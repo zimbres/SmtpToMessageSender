@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>dotnet-SmtpToMessageSender-c7aabfed-be4a-4c47-8658-3b2c7f505b63</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerfileContext>..\..</DockerfileContext>
+		<AssemblyVersion>$(PackageVersion)</AssemblyVersion>
+		<FileVersion>$(PackageVersion)</FileVersion>
+		<Version>1.0.0.1</Version>
+		<Title>Smtp To MessageSender</Title>
+		<Authors>zimbres</Authors>
+		<Company>Zimbres.COM</Company>
+		<Copyright>Zimbres.COM</Copyright>
+		<PackageProjectUrl>https://github.com/zimbres/SmtpToMessageSender</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/zimbres/SmtpToMessageSender</RepositoryUrl>
+		<ApplicationIcon>mail.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="mail.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+		<PackageReference Include="MimeKit" Version="4.14.0" />
+		<PackageReference Include="SmtpServer" Version="11.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SmtpToMessageSender.ServiceDefaults\SmtpToMessageSender.ServiceDefaults.csproj" />
+	</ItemGroup>
+</Project>
