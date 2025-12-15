@@ -24,7 +24,7 @@ builder.Services.AddSingleton(provider =>
         endpointBuilder.Port(smtpConfig.SecurePort)
             .IsSecure(true)
             .AllowUnsecureAuthentication(false)
-            .SupportedSslProtocols(System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls12)
+            .SupportedSslProtocols(System.Security.Authentication.SslProtocols.Tls13 | System.Security.Authentication.SslProtocols.Tls12)
             .Certificate(provider.GetRequiredService<CertificateHandler>().GetCertificate());
 
         if (smtpConfig.SecurePortAuthenticationRequired)
