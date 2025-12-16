@@ -2,13 +2,17 @@
 
 public sealed class MessageHandler : MessageStore
 {
+    private readonly ILogger<MessageHandler> _logger;
     private readonly IMessageSender _messageSender;
     private readonly ActivitySource _activitySource;
+    private readonly SmtpConfiguration _smtpConfiguration;
 
-    public MessageHandler(IMessageSender messageSender, ActivitySource activitySource)
+    public MessageHandler(IMessageSender messageSender, ActivitySource activitySource, ILogger<MessageHandler> logger, IConfiguration configuration)
     {
         _messageSender = messageSender;
         _activitySource = activitySource;
+        _logger = logger;
+        _smtpConfiguration = configuration.GetSection("SmtpConfiguration").Get<SmtpConfiguration>()!;
     }
 
     public override async Task<SmtpResponse> SaveAsync(ISessionContext context, IMessageTransaction transaction,
@@ -20,6 +24,22 @@ public sealed class MessageHandler : MessageStore
         activity?.SetTag("protocol", "smtp");
         activity?.SetTag("smtp.session.id", context.SessionId);
         activity?.SetTag("smtp.message.size", buffer.Length);
+        if (context.Properties.TryGetValue("EndpointListener:RemoteEndPoint", out var endpointValue) && endpointValue is IPEndPoint ipEndPoint)
+        {
+            IPAddress ipAddress = ipEndPoint.Address;
+            using var checkIp = _activitySource.StartActivity("MessageHandler.CheckClientIp", ActivityKind.Internal);
+            checkIp?.SetTag("smtp.client.ip", ipAddress);
+
+            var AllowedSmtpClients = _smtpConfiguration.AllowedSmtpClients;
+
+            if (AllowedSmtpClients.Count != 0 && !AllowedSmtpClients.Any(a => IpHelper.IpMatches(a, ipAddress)))
+            {
+                checkIp?.SetTag("smtp.client.allowed", false);
+                _logger.LogError("Connection from an IP not allowed: {IpAddress}", ipAddress);
+                return SmtpResponse.TransactionFailed;
+            }
+            checkIp?.SetTag("smtp.client.allowed", true);
+        }
 
         try
         {

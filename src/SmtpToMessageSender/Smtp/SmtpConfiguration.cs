@@ -11,4 +11,5 @@ public class SmtpConfiguration
     public bool SelfSignedCertificate { get; set; }
     public string CertBase64Content { get; set; } = string.Empty;
     public string KeyBase64Content { get; set; } = string.Empty;
+    public List<string> AllowedSmtpClients { get; set; } = [];
 }
