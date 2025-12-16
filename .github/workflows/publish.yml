@@ -64,7 +64,7 @@ jobs:
         with:
           images: |
             zimbres/smtp-to-messagesender
-            ghcr.io/zimbres/smtptomessagesender
+            ghcr.io/zimbres/smtp-to-messagesender
           flavor: |
             latest=true
           tags: |
@@ -97,7 +97,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: src/MerakiPingApiInterface/Dockerfile
+          file: src/SmtpToMessageSender/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           push: true
