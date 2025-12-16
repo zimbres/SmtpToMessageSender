@@ -30,10 +30,14 @@ public sealed class MessageHandler : MessageStore
             using var checkIp = _activitySource.StartActivity("MessageHandler.CheckClientIp", ActivityKind.Internal);
             checkIp?.SetTag("smtp.client.ip", ipAddress);
 
-            var AllowedSmtpClients = _smtpConfiguration.AllowedSmtpClients;
+            var allowedSmtpClients = _smtpConfiguration.AllowedSmtpClients;
 
-            if (AllowedSmtpClients.Count != 0 && !AllowedSmtpClients.Any(a => IpHelper.IpMatches(a, ipAddress)))
+            if (allowedSmtpClients.Count != 0 && !allowedSmtpClients.Any(a => IpHelper.IpMatches(a, ipAddress)))
             {
+                checkIp?.AddEvent(new ActivityEvent("smtp.client.validation.failed", tags: new ActivityTagsCollection
+                {
+                    ["smtp.client"] = ipAddress
+                }));
                 checkIp?.SetTag("smtp.client.allowed", false);
                 _logger.LogError("Connection from an IP not allowed: {IpAddress}", ipAddress);
                 return SmtpResponse.TransactionFailed;
@@ -88,8 +92,9 @@ public sealed class MessageHandler : MessageStore
             activity?.SetStatus(ActivityStatusCode.Error, "Failed to forward message");
             return SmtpResponse.MailboxUnavailable;
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
+            activity?.AddException(ex);
             activity?.SetStatus(ActivityStatusCode.Error, "Operation canceled");
             Metrics.SmtpMessagesFailed.Add(1);
             throw;

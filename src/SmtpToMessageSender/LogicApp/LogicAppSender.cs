@@ -22,7 +22,7 @@ public class LogicAppSender : IMessageSender
         activity?.SetTag("messaging.system", "email");
         activity?.SetTag("messaging.destination", "azure.logicapp");
         activity?.SetTag("email.to.count", mailMessage.To.Count);
-        activity?.SetTag("http.url", _httpConfiguration.Url);
+        activity?.SetTag("http.url", new Uri(_httpConfiguration.Url).GetLeftPart(UriPartial.Authority));
 
         try
         {
@@ -52,6 +52,11 @@ public class LogicAppSender : IMessageSender
                 return true;
             }
 
+            activity?.AddEvent(new ActivityEvent("Logic App returned non-OK status code", tags: new ActivityTagsCollection
+            {
+                ["http.status_code"] = response.StatusCode,
+                ["http.reason_phrase"] = response.ReasonPhrase
+            }));
             activity?.SetStatus(ActivityStatusCode.Error, $"Unexpected status code {response.StatusCode}");
             Metrics.MessageSenderSendFailure.Add(1);
             return false;
