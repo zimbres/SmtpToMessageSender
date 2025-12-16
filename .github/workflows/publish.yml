@@ -64,7 +64,7 @@ jobs:
         with:
           images: |
             zimbres/smtp-to-messagesender
-            ghcr.io/zimbres/smtp-to-messagesender
+            ghcr.io/zimbres/smtptomessagesender
           flavor: |
             latest=true
           tags: |
